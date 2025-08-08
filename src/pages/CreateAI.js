@@ -1,0 +1,185 @@
+import React, { useState } from "react";
+import axios from "axios";
+import { useNavigate } from 'react-router-dom';
+import { FaSpinner } from "react-icons/fa"; // Import spinner icon
+import { FaPlay, FaEdit } from "react-icons/fa";
+
+
+import "../styles.css"; // Import styles
+
+const CreateAI = () => {
+  const [title, setTitle] = useState("");
+  const [details, setDetails] = useState("");
+  const [popup, setPopup] = useState(null);
+  const [progress, setProgress] = useState(0);
+  const [createId, setCreateId] = useState(null);
+
+  const navigate = useNavigate();
+
+  React.useEffect(() => {
+    if (popup === 'spinner') {
+      setProgress(0);
+      const interval = setInterval(() => {
+        setProgress((prev) => {
+          if (prev >= 100) {
+            clearInterval(interval);
+            return 100;
+          }
+          return prev + 1.25; // ~8 seconds total (100 / 1.25 = 80 steps)
+        });
+      }, 100); // update every 100ms
+
+      return () => clearInterval(interval);
+    }
+  }, [popup]);
+
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!title.trim()) {
+      alert("Title cannot be empty.");
+      return;
+    }
+
+    setPopup('spinner'); // Show spinner popup
+
+    try {
+      const response = await axios.post(
+        "https://quizure.com/api/quiz_ai",
+        { title, details },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+          withCredentials: true,
+        }
+      );
+
+      if (response.status === 200) {
+        const { id } = response.data;
+        setPopup('finished'); // Show finished popup
+        setCreateId(id); // Store the created quiz ID
+      } else {
+        alert("Error: " + (response.data?.error || "Unexpected server response."));
+        setPopup(null); // Hide spinner
+      }
+    } catch (error) {
+      console.error("Quiz generation failed:", error);
+      alert("Something went wrong, please try again.");
+      setPopup(null); // Hide spinner
+    }
+  };
+
+  return (
+    <div style={{ maxWidth: 600, margin: "50px auto", padding: 20 }}>
+      {popup && (
+        <div className="popup-overlay" onClick={() => setPopup(false)}>
+          {
+            popup === 'spinner'
+              ? <div style={{ textAlign: 'center', color: '#fff' }}>
+                <FaSpinner className="spinner" style={{ fontSize: "5rem", color: "#fff" }} />
+                <div style={{
+                  marginTop: "20px",
+                  width: "80%",
+                  height: "10px",
+                  backgroundColor: "#444",
+                  borderRadius: "5px",
+                  overflow: "hidden",
+                  margin: "20px auto"
+                }}>
+                  <div style={{
+                    height: "100%",
+                    width: `${progress}%`,
+                    backgroundColor: "#00c2ff",
+                    transition: "width 0.1s linear"
+                  }} />
+                </div>
+                <div>{Math.round(progress)}%</div>
+              </div>
+              : popup === 'finished'
+              && <div className="popup" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }} onClick={(e) => e.stopPropagation()}>
+                <div>Your quiz has been created!</div>
+                <button
+                  onClick={() => {
+                    setPopup(null);
+                    navigate(`/quiz/${createId}/10`);
+                  }}
+                  style={{
+                    padding: "5px 10px",
+                    backgroundColor: "#4CAF50",
+                    color: "#fff",
+                    border: "none",
+                    borderRadius: "10px",
+                    cursor: "pointer",
+                    marginTop: "20px",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "6px",
+                  }}
+                >
+                  <FaPlay /> Play
+                </button>
+
+                <button
+                  onClick={() => {
+                    setPopup(null);
+                    navigate(`/editquiz/${createId}`);
+                  }}
+                  style={{
+                    padding: "5px 10px",
+                    backgroundColor: "#4CAF50",
+                    color: "#fff",
+                    border: "none",
+                    borderRadius: "10px",
+                    cursor: "pointer",
+                    marginTop: "20px",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "6px",
+                  }}
+                >
+                  <FaEdit /> Review / Edit
+                </button>
+              </div>
+          }
+
+
+        </div>
+      )}
+
+      <h2>Create Quiz</h2>
+      <form onSubmit={handleSubmit}>
+        <div style={{ marginBottom: 20 }}>
+          <label>
+            Title *:
+            <input
+              type="text"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              style={{ width: "100%", padding: "10px", marginTop: "5px" }}
+              required
+            />
+          </label>
+        </div>
+        <div style={{ marginBottom: 20 }}>
+          <label>
+            Details (optional):
+            <input
+              type="text"
+              value={details}
+              onChange={(e) => setDetails(e.target.value)}
+              style={{ width: "100%", padding: "10px", marginTop: "5px" }}
+              required
+            />
+          </label>
+        </div>
+        <button type="submit" style={{ padding: "10px 20px" }}>
+          Submit
+        </button>
+      </form>
+    </div>
+  );
+};
+
+export default CreateAI;

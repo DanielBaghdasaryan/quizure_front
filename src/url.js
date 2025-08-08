@@ -1,0 +1,1 @@
+export const baseUrl = 'https://quizure.com/api/'
