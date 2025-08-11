@@ -5,6 +5,7 @@ import SignIn from "./pages/SignIn";
 import Create from "./pages/Create";
 import EditQuiz from "./pages/EditQuiz";
 import Quiz from "./pages/Quiz";
+import Stats from "./pages/Stats";
 import { MdLogin, MdHome, MdAdd } from "react-icons/md";
 import logo from "./quizure_logo-Recovered_240.png";
 
@@ -186,6 +187,7 @@ const AppContent = ({ user, setUser, showPopup, setShowPopup, logout }) => {
         <Route path="/create_ai" element={<CreateAI />} />
         <Route path="/editquiz/:id" element={<EditQuiz />} />
         <Route path="/quiz/:id/:num" element={<Quiz />} />
+        <Route path="/stats" element={<Stats />} />
       </Routes>
     </div>
   );

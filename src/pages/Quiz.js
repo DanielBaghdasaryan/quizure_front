@@ -260,7 +260,6 @@ const Quiz = () => {
                     padding: "10px 15px",
                     borderRadius: "10px",
                     backgroundColor: bgCollor,
-                    // boxShadow: (option.startsWith("<*>") && submitted) && "inset 0 0 0 7px #4CAF50",
                     cursor: "pointer",
                     color: submitted && (
                       (
@@ -272,7 +271,12 @@ const Quiz = () => {
                       )
                     ) && "red", // Change text color based on selection
                   }}
-                  onClick={() => handleAnswerClick(answerIndex)}
+                  // if wrongIndex is not null or showNext is true, then onClick should be disabled
+                  onClick={() => {
+                    if (wrongIndex === null && !showNext) {
+                      handleAnswerClick(answerIndex);
+                    }
+                  }}
                 >
                   {
                     multipleChoice && (
