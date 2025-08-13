@@ -163,13 +163,13 @@ const Home = ({ user }) => {
           </div>
         )}
 
-        <Link to="/create_ai" className="create-link">
+        <Link to={user ? "/create_ai" : "/signin"} className="create-link">
           <div className="create-button" style={{ color: "#396792", display: "flex", alignItems: "center", gap: "10px" }}>
             <FaRobot size={25} color={iconColor} />
             <span style={{ position: "relative", top: "2px" }}>Generate a quiz with AI</span>
           </div>
         </Link>
-        <Link to="/create_xlsx" className="create-link">
+        <Link to={user ? "/create_xlsx" : "/signin"} className="create-link">
           <div className="create-button" style={{ color: "#396792", display: "flex", alignItems: "center", gap: "10px" }}>
             <AiOutlineFileExcel size={25} color={iconColor} />
             <span style={{ position: "relative", top: "2px" }}>Create a quiz from XLSX file</span>
@@ -180,14 +180,14 @@ const Home = ({ user }) => {
         <div
           className="create-button"
           style={{ color: "#396792", display: "flex", alignItems: "center", gap: "10px" }}
-          onClick={() => setPopup('title')}
+          onClick={() => { user ? setPopup('title') : navigate('/signin') }}
         >
           <FaRegEdit size={25} color={iconColor} />
           <span style={{ position: "relative", top: "2px" }}>Create Manually</span>
         </div>
       </div>
 
-      {popup && (
+      {(popup && popup !== 'title') && (
         <div className="popup-overlay" onClick={() => setPopup(null)}>
           <div className="popup" onClick={(e) => e.stopPropagation()}>
             <div style={{ display: "flex", marginBottom: "10px", alignItems: "center" }}>
