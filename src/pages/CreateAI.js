@@ -13,6 +13,7 @@ const CreateAI = () => {
   const [popup, setPopup] = useState(null);
   const [progress, setProgress] = useState(0);
   const [createId, setCreateId] = useState(null);
+  const [attempts, setAttempts] = useState(0);
 
   const navigate = useNavigate();
 
@@ -31,10 +32,10 @@ const CreateAI = () => {
 
       return () => clearInterval(interval);
     }
-  }, [popup]);
+  }, [popup, attempts]);
 
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e, localAttempts = attempts) => {
     e.preventDefault();
 
     if (!title.trim()) {
@@ -58,16 +59,21 @@ const CreateAI = () => {
 
       if (response.status === 200) {
         const { id } = response.data;
-        setPopup('finished'); // Show finished popup
-        setCreateId(id); // Store the created quiz ID
+        setPopup('finished');
+        setCreateId(id);
       } else {
         alert("Error: " + (response.data?.error || "Unexpected server response."));
-        setPopup(null); // Hide spinner
+        setPopup(null);
       }
     } catch (error) {
-      console.error("Quiz generation failed:", error);
-      alert("Something went wrong, please try again.");
-      setPopup(null); // Hide spinner
+      if (localAttempts >= 2) {
+        alert("Something went wrong, please try again later.");
+        setPopup(null);
+      } else {
+        const nextAttempt = localAttempts + 1;
+        setAttempts(nextAttempt);
+        handleSubmit(e, nextAttempt); // retry with updated value
+      }
     }
   };
 
@@ -79,6 +85,13 @@ const CreateAI = () => {
             popup === 'spinner'
               ? <div style={{ textAlign: 'center', color: '#fff' }}>
                 <FaSpinner className="spinner" style={{ fontSize: "5rem", color: "#fff" }} />
+                {
+                  attempts > 0 && (
+                    <div style={{ marginTop: "20px" }}>
+                      Attempt {attempts + 1} of 3
+                    </div>
+                  )
+                }
                 <div style={{
                   marginTop: "20px",
                   width: "80%",
@@ -148,13 +161,14 @@ const CreateAI = () => {
         </div>
       )}
 
-      <h2>Create Quiz</h2>
+      <h2>Create a Quiz with AI</h2>
       <form onSubmit={handleSubmit}>
         <div style={{ marginBottom: 20 }}>
           <label>
             Title *:
             <input
               type="text"
+              maxLength={50}
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               style={{ width: "100%", padding: "10px", marginTop: "5px" }}
@@ -167,10 +181,10 @@ const CreateAI = () => {
             Details (optional):
             <input
               type="text"
+              maxLength={200}
               value={details}
               onChange={(e) => setDetails(e.target.value)}
               style={{ width: "100%", padding: "10px", marginTop: "5px" }}
-              required
             />
           </label>
         </div>
