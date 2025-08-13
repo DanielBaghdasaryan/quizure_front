@@ -1,12 +1,11 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route, Link, useLocation } from "react-router-dom";
 import Home from "./pages/Home";
 import SignIn from "./pages/SignIn";
-import Create from "./pages/Create";
 import EditQuiz from "./pages/EditQuiz";
 import Quiz from "./pages/Quiz";
 import Stats from "./pages/Stats";
-import { MdLogin, MdHome, MdAdd } from "react-icons/md";
+import { MdLogin, MdHome } from "react-icons/md";
 import logo from "./quizure_logo-Recovered_240.png";
 
 import "./styles.css";
@@ -149,13 +148,6 @@ const AppContent = ({ user, setUser, showPopup, setShowPopup, logout }) => {
           <Link to="/" style={{ textDecoration: "none", color: "#396792" }}>
             <MdHome size={30} style={{ cursor: "pointer" }} />
           </Link>
-          {
-            location.pathname !== "/create" && (
-              <Link to={user ? "/create" : "/signin"} style={{ textDecoration: "none", color: "#396792" }}>
-                <MdAdd size={30} style={{ cursor: "pointer" }} />
-              </Link>
-            )
-          }
         </div>
       ) : (
         <div
@@ -182,7 +174,6 @@ const AppContent = ({ user, setUser, showPopup, setShowPopup, logout }) => {
       <Routes>
         <Route path="/" element={<Home user={user} />} />
         <Route path="/signin" element={<SignIn user={user} />} />
-        <Route path="/create" element={<Create />} />
         <Route path="/create_xlsx" element={<CreateXlsx />} />
         <Route path="/create_ai" element={<CreateAI />} />
         <Route path="/editquiz/:id" element={<EditQuiz />} />

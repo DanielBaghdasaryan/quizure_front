@@ -1,9 +1,13 @@
 import React, { useEffect, useState, useRef, useCallback } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { baseUrl } from "../url";
-import { FiPlus, FiMenu, FiEdit2 } from "react-icons/fi";
-import create_new_image from "../create_new_small.png";
+import { FiMenu, FiEdit2 } from "react-icons/fi";
 import { FaTimes, FaPlay } from "react-icons/fa"; // Import the close icon
+import { FaSpinner } from "react-icons/fa"; // Import spinner icon
+import { FaRobot, FaRegEdit } from "react-icons/fa";
+import { AiOutlineFileExcel } from "react-icons/ai";
+
+import axios from "axios";
 
 
 const Home = ({ user }) => {
@@ -13,6 +17,9 @@ const Home = ({ user }) => {
   const lastQuizId = useRef(null);
   const loadingRef = useRef(false); // to avoid stale closures
   const [popup, setPopup] = useState(null);
+  const [text, setText] = React.useState("");
+  const [loadingSubmit, setLoadingSubmit] = React.useState(false);
+
   const navigate = useNavigate();
 
   const fetchQuizes = useCallback(async () => {
@@ -67,8 +74,119 @@ const Home = ({ user }) => {
     setPopup(quiz); // Set the popup with the selected quiz
   };
 
+  const iconColor = "#396792";
+
+  const handlePopupSubmit = async () => {
+    if (!text.trim()) {
+      alert("Field cannot be empty.");
+      return;
+    }
+
+    setLoadingSubmit(true);
+
+    const response = await axios.post(
+      "https://quizure.com/api/quiz",
+      { title: text }, // Send the title as the request body
+      { withCredentials: true } // Include credentials for authentication
+    );
+
+    if (response.status === 200) {
+      const { id } = response.data; // Assuming the response contains the quiz JSON with an `id`
+      navigate(`/editquiz/${id}`); // Navigate to the edit page with the quiz ID
+    }
+  }
+
+
   return (
     <div style={{ marginTop: "10px" }}>
+      <div style={{ marginBottom: "40px", marginTop: "40px" }}>
+        {(popup === 'title') && (
+          <div className="popup-overlay" onClick={() => setPopup(null)}>
+            <div className="popup" onClick={(e) => e.stopPropagation()}>
+              <div style={{ display: "flex", marginBottom: "10px", alignItems: "center" }}>
+                Title
+                {loadingSubmit && <FaSpinner className="spinner" style={{ fontSize: "1.2rem", color: "#777", marginLeft: "10px" }} />}
+                <FaTimes
+                  onClick={() => setPopup(null)} // Close the popup when clicked
+                  style={{
+                    marginLeft: "auto", // Move the icon to the right
+                    cursor: "pointer",
+                    fontSize: "1.5rem",
+                    color: "#777",
+                  }}
+                />
+              </div>
+              <input
+                type="text"
+                value={text}
+                onChange={(e) => setText(e.target.value)} // Update text state on input change
+                style={{
+                  width: "100%",
+                  boxSizing: "border-box",
+                  padding: "10px",
+                  marginBottom: "10px",
+                  border: "1px solid #ccc",
+                  borderRadius: "5px",
+                }}
+              />
+              <div style={{ display: "flex" }}>
+                <div
+                  onClick={handlePopupSubmit}
+                  style={{
+                    padding: "5px 10px",
+                    backgroundColor: "#4CAF50",
+                    borderRadius: "10px",
+                    marginRight: "10px",
+                    cursor: "pointer",
+                    color: "#fff",
+                  }}
+                >
+                  Submit
+                </div>
+                <div
+                  onClick={() => setPopup(null)}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    padding: "5px 10px",
+                    backgroundColor: "#F44336",
+                    borderRadius: "10px",
+                    cursor: "pointer",
+                    color: "#fff",
+                  }}
+                >
+                  Close
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        <Link to="/create_ai" className="create-link">
+          <div className="create-button" style={{ color: "#396792", display: "flex", alignItems: "center", gap: "10px" }}>
+            <FaRobot size={25} color={iconColor} />
+            <span style={{ position: "relative", top: "2px" }}>Generate a quiz with AI</span>
+          </div>
+        </Link>
+        <Link to="/create_xlsx" className="create-link">
+          <div className="create-button" style={{ color: "#396792", display: "flex", alignItems: "center", gap: "10px" }}>
+            <AiOutlineFileExcel size={25} color={iconColor} />
+            <span style={{ position: "relative", top: "2px" }}>Create a quiz from XLSX file</span>
+          </div>
+        </Link>
+
+
+        <div
+          className="create-button"
+          style={{ color: "#396792", display: "flex", alignItems: "center", gap: "10px" }}
+          onClick={() => setPopup('title')}
+        >
+          <FaRegEdit size={25} color={iconColor} />
+          <span style={{ position: "relative", top: "2px" }}>Create Manually</span>
+        </div>
+      </div>
+
       {popup && (
         <div className="popup-overlay" onClick={() => setPopup(null)}>
           <div className="popup" onClick={(e) => e.stopPropagation()}>
@@ -200,30 +318,6 @@ const Home = ({ user }) => {
         </div>
       )}
       <div style={{ display: "flex", flexWrap: "wrap" }}>
-        <Link to={user ? "/create" : "/signin"} style={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          width: "200px",
-          maxWidth: "calc(50% - 15px)",
-          margin: "5px",
-          // border: "1px solid #ccc",
-          boxSizing: "border-box",
-          borderRadius: "15px",
-          height: "130px",
-          flexDirection: "column",
-          textDecoration: "none",        // remove underline
-          color: "#777",
-          // backgroundColor: "#eaeff4",
-          backgroundImage: `linear-gradient(rgba(255,255,255,0.6), rgba(255,255,255,0.6)), url(${create_new_image})`, // Wrap in url()
-          backgroundSize: "cover", // Ensure the image covers the element
-          backgroundPosition: "center", // Center the image
-          backgroundRepeat: "no-repeat", // Prevent tiling
-          border: "5px solid #888",
-        }}>
-          <div style={{ marginBottom: "10px" }}><FiPlus size={50} style={{ color: "#777" }} /></div>
-          <div><b>Create New Quiz</b></div>
-        </Link>
         {quizes.map((quiz) => (
           <Link key={quiz.id} to={`/quiz/${quiz.id}/10`}
             style={{
