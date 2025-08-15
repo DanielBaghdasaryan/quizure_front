@@ -82,16 +82,17 @@ const CreateXlsx = () => {
       <img
         src={xlsx} // Path to the logo
         alt=''
-        style={{ marginBottom: 20 }}
+        style={{ marginBottom: 50 }}
       />
-      <p><b>3. Single Select:</b> If no option starts with "&lt;*&gt;", the question is <i>Single Select</i>. First option is correct. (Options will be shown in random order in the quiz.)</p>
+      <p><b>3. Single Select:</b> If no option starts with <b>&lt;*&gt;</b>, the question is <i>Single Select</i>. First option is correct.</p>
+      <p style={{ marginBottom: 20 }}><i>* Options will be shown in random order in the quiz.</i></p>
       <img
         src={xlsx1} // Path to the logo
         alt=''
+        style={{ marginBottom: 50 }}
 
       />
-      <p style={{ marginBottom: 20 }}><i>* Colors in examples are for illustration only. No colors are required in your file.</i></p>
-      <p><b>4. Multi Select:</b> If any option starts with "&lt;*&gt;", the question is <i>Multi Select</i>. All options with "&lt;*&gt;" are correct.</p>
+      <p><b>4. Multi Select:</b> If any option starts with <b>&lt;*&gt;</b>, the question is <i>Multi Select</i>. All options with <b>&lt;*&gt;</b> are correct.</p>
       <img
         src={xlsx2} // Path to the logo
         alt=''
