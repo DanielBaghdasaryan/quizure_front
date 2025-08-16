@@ -72,7 +72,16 @@ const CreateXlsx = () => {
             />
           </label>
         </div>
-        <button type="submit" style={{ padding: "10px 20px" }}>
+        <button type="submit"
+          style={{
+            padding: "5px 10px",
+            backgroundColor: "#4CAF50",
+            borderRadius: "10px",
+            marginRight: "10px",
+            cursor: "pointer",
+            color: "#fff",
+            border: "none",
+          }}>
           Submit
         </button>
       </form>
@@ -82,21 +91,20 @@ const CreateXlsx = () => {
       <img
         src={xlsx} // Path to the logo
         alt=''
-        style={{ marginBottom: 50 }}
+        style={{ marginBottom: 50, maxWidth: "100%", height: "auto" }}
       />
       <p><b>3. Single Select:</b> If no option starts with <b>&lt;*&gt;</b>, the question is <i>Single Select</i>. First option is correct.</p>
       <p style={{ marginBottom: 20 }}><i>* Options will be shown in random order in the quiz.</i></p>
       <img
         src={xlsx1} // Path to the logo
         alt=''
-        style={{ marginBottom: 50 }}
-
+        style={{ marginBottom: 50, maxWidth: "100%", height: "auto" }}
       />
       <p><b>4. Multi Select:</b> If any option starts with <b>&lt;*&gt;</b>, the question is <i>Multi Select</i>. All options with <b>&lt;*&gt;</b> are correct.</p>
       <img
         src={xlsx2} // Path to the logo
         alt=''
-        style={{ marginBottom: 20 }}
+        style={{ marginBottom: 20, maxWidth: "100%", height: "auto" }}
       />
     </div>
   )

@@ -188,7 +188,16 @@ const CreateAI = () => {
             />
           </label>
         </div>
-        <button type="submit" style={{ padding: "10px 20px" }}>
+        <button type="submit"
+          style={{
+            padding: "5px 10px",
+            backgroundColor: "#4CAF50",
+            borderRadius: "10px",
+            marginRight: "10px",
+            cursor: "pointer",
+            color: "#fff",
+            border: "none",
+          }}>
           Submit
         </button>
       </form>
