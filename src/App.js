@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { BrowserRouter as Router, Routes, Route, Link, useLocation } from "react-router-dom";
 import Home from "./pages/Home";
 import SignIn from "./pages/SignIn";
@@ -14,7 +14,7 @@ import CreateXlsx from "./pages/CreateXlsx";
 import CreateAI from "./pages/CreateAI";
 import { FaSpinner, FaTimes } from "react-icons/fa"; // Import icons
 import axios from "axios";
-
+import { FiEdit2 } from "react-icons/fi";
 
 
 const AppContent = ({ user, setUser, showPopup, setShowPopup, logout }) => {
@@ -34,6 +34,42 @@ const AppContent = ({ user, setUser, showPopup, setShowPopup, logout }) => {
     setSpinner(null);
   }
 
+  const fileInputRef = useRef();
+
+  const handleImageDivClick = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.value = null; // reset file input
+      fileInputRef.current.click();
+    }
+  };
+
+  const handleFileChange = async (e) => {
+    setSpinner("avatar");
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append("photo", file);
+    formData.append("type", "user");
+    // after picture upload, we need to update the user picture_id
+    await fetch("https://quizure.com/api/upload", {
+      method: "POST",
+      body: formData,
+      credentials: "include",
+    })
+
+    const response = await fetch("https://quizure.com/api/user", {
+      method: "GET",
+      credentials: "include",
+    });
+
+    if (response.ok) {
+      const { user: updatedUser } = await response.json();
+      setUser(updatedUser);
+    }
+    setSpinner(null);
+  };
+
   useEffect(() => {
     setUsername(user ? user.name : "");
   }, [user]);
@@ -47,7 +83,7 @@ const AppContent = ({ user, setUser, showPopup, setShowPopup, logout }) => {
               width: "30px",
               height: "30px",
               marginTop: "-5px",
-              backgroundImage: `url("https://quizure.com/images/users/${user.picture_id}.jpg")`,
+              backgroundImage: `url("https://quizure.com/images/users/${user.id}_${user.picture_id}.jpg")`,
               backgroundSize: "cover",         // makes image fill the box
               backgroundPosition: "center",    // centers the image
               backgroundRepeat: "no-repeat",   // prevents tiling
@@ -72,6 +108,40 @@ const AppContent = ({ user, setUser, showPopup, setShowPopup, logout }) => {
                         color: "#777",
                       }}
                     />
+                  </div>
+                  <div style={{ marginBottom: "20px", textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center" }}>
+                    <div
+                      style={{ width: 150, cursor: "pointer" }}
+                      onClick={handleImageDivClick} // <-- update here
+                    >
+                      <input
+                        type="file"
+                        accept="image/*"
+                        style={{ display: "none" }}
+                        ref={fileInputRef}
+                        onChange={handleFileChange}
+                      />
+                      <img
+                        src={`https://quizure.com/images/users/${user.id}_${user.picture_id}.jpg`}
+                        alt="User"
+                        style={{
+                          width: 100,
+                          height: 100,
+                          borderRadius: "50%",
+                          objectFit: "cover",
+                        }}
+                      />
+                      {
+                        spinner === "avatar"
+                          ? <FaSpinner className="spinner" style={{ fontSize: "1rem", color: "#777", marginLeft: "10px" }} />
+                          : <FiEdit2
+                            style={{
+                              color: "#777",
+                            }}
+                          />
+                      }
+
+                    </div>
                   </div>
                   <p style={{ lineHeight: "1.5" }}>
                     <span style={{

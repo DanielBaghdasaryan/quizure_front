@@ -1,8 +1,11 @@
-import React, { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
 import { FaSpinner, FaCheckCircle, FaRegCircle, FaCheckSquare, FaRegSquare, FaTrash, FaTimes, FaPlay } from "react-icons/fa"; // Import icons
 import { MdWarning } from "react-icons/md"; // Import warning icon
+import { FiEdit2 } from "react-icons/fi"; // Import edit icon
+import { FaImage } from "react-icons/fa"; // Add this import at the top if not present
+
 
 import "../styles.css"; // Import styles
 
@@ -12,10 +15,12 @@ const EditQuiz = () => {
   const [loading, setLoading] = useState([null, null]);
   const [loadingMultiselect, setLoadingMultiselect] = useState(null);
   const [loadingSubmit, setLoadingSubmit] = useState(false);
+  const [loadingPicture, setLoadingPicture] = useState(null);
   const [text, setText] = useState("");
   const [popup, setPopup] = useState(null); // Popup state
   const [editQuestionIndex, setEditQuestionIndex] = useState(null); // Track which question is being edited
   const [editAnswerIndex, setEditAnswerIndex] = useState(null); // Track which answer is being edited
+
   const navigate = useNavigate(); // Use navigate from react-router-dom
 
   const fetchQuiz = useCallback(async () => {
@@ -25,6 +30,7 @@ const EditQuiz = () => {
     setLoading([null, null]); // Reset loading state after fetching
     setLoadingMultiselect(null); // Reset multiselect loading state
     setLoadingSubmit(false); // Reset submit loading state
+    setLoadingPicture(null); // Reset picture loading state
     setQuiz(response.data);
     setPopup(null); // Reset popup state
   }, [id]);
@@ -40,6 +46,40 @@ const EditQuiz = () => {
       setText(""); // Clear text when popup is closed
     }
   }, [popup]);
+
+  // create an array of refs
+  const fileInputRefs = useRef([]);
+
+  const handleImageDivClick = (index) => {
+    // Delay the file input trigger to ensure state is updated
+    if (fileInputRefs.current[index]) {
+      fileInputRefs.current[index].value = null;
+      fileInputRefs.current[index].click();
+    }
+  };
+
+  const handleFileChange = async (e, questionIndex) => {
+    console.log(questionIndex)
+    setLoadingPicture(questionIndex);
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append("photo", file);
+    formData.append("type", "question");
+    formData.append("quiz_id", quiz.id);
+    formData.append("question_index", questionIndex);
+    // after picture upload, we need to update the user picture_id
+    await fetch("https://quizure.com/api/upload", {
+      method: "POST",
+      body: formData,
+      credentials: "include",
+    })
+
+    fetchQuiz();
+
+  };
+
 
   const handleAnswerClick = async (questionIndex, answerIndex) => {
     const updatedQuestions = [...quiz.questions];
@@ -170,6 +210,23 @@ const EditQuiz = () => {
     fetchQuiz();
   };
 
+  const handleDeleteImage = async () => {
+    setLoadingSubmit(true); // Set loading state for submit
+    console.log('here')
+
+    await axios.put(`https://quizure.com/api/image`, {
+      type: "question",
+      quiz_id: quiz.id,
+      question_index: editQuestionIndex,
+    },
+      { withCredentials: true },
+    );
+    console.log('and here')
+
+    // Refetch the quiz after a successful update
+    fetchQuiz();
+  };
+
   if (!quiz) {
     return <p>Loading quiz details...</p>;
   }
@@ -179,81 +236,119 @@ const EditQuiz = () => {
       {popup && (
         <div className="popup-overlay" onClick={() => setPopup(false)}>
           <div className="popup" onClick={(e) => e.stopPropagation()}>
-            <div style={{ display: "flex", marginBottom: "10px", alignItems: "center" }}>
-              {((popup !== "Add answer" && popup !== "Add question") ? "Edit " : "") + popup}
-              {loadingSubmit && <FaSpinner className="spinner" style={{ fontSize: "1.2rem", color: "#777", marginLeft: "10px" }} />}
-              <FaTimes
-                onClick={() => setPopup(false)} // Close the popup when clicked
-                style={{
-                  marginLeft: "auto", // Move the icon to the right
-                  cursor: "pointer",
-                  fontSize: "1.5rem",
-                  color: "#777",
-                }}
-              />
-            </div>
-            <input
-              type="text"
-              value={text}
-              onChange={(e) => setText(e.target.value)} // Update text state on input change
-              style={{
-                width: "100%",
-                boxSizing: "border-box",
-                padding: "10px",
-                marginBottom: "10px",
-                border: "1px solid #ccc",
-                borderRadius: "5px",
-              }}
-            />
-            <div style={{ display: "flex" }}>
-              <div
-                onClick={handlePopupSubmit}
-                style={{
-                  padding: "5px 10px",
-                  backgroundColor: "#4CAF50",
-                  borderRadius: "10px",
-                  marginRight: "10px",
-                  cursor: "pointer",
-                  color: "#fff",
-                }}
-              >
-                Submit
-              </div>
-              <div
-                onClick={() => setPopup(false)}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  padding: "5px 10px",
-                  backgroundColor: "#F44336",
-                  borderRadius: "10px",
-                  cursor: "pointer",
-                  color: "#fff",
-                }}
-              >
-                Close
-              </div>
-              {popup === "question" || popup === "answer" ? (
-                <div
-                  onClick={handleDeleteField}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    padding: "5px 10px",
-                    backgroundColor: "#F44336",
-                    borderRadius: "10px",
-                    cursor: "pointer",
-                    color: "#fff",
-                    marginLeft: "auto", // Move the Delete button to the right
-                  }}
-                >
-                  <FaTrash style={{ fontSize: "1.2rem" }} /> {/* Trash icon */}
-
+            {
+              popup === "delete" ? (
+                <div style={{ display: "flex", flexDirection: "column", marginBottom: "10px", alignItems: "center" }}>
+                  <div>Delete image?</div>
+                  <div style={{ display: "flex", gap: "10px", marginTop: "10px" }}>
+                    <div
+                      onClick={handleDeleteImage}
+                      style={{
+                        padding: "5px 10px",
+                        backgroundColor: "#4CAF50",
+                        borderRadius: "10px",
+                        cursor: "pointer",
+                        color: "#fff",
+                      }}
+                    >
+                      Yes
+                    </div>
+                    <div
+                      onClick={() => setPopup(false)}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        padding: "5px 10px",
+                        backgroundColor: "#F44336",
+                        borderRadius: "10px",
+                        cursor: "pointer",
+                        color: "#fff",
+                      }}
+                    >
+                      No
+                    </div>
+                  </div>
                 </div>
-              ) : null}
-            </div>
+              ) : <>
+                <div style={{ display: "flex", marginBottom: "10px", alignItems: "center" }}>
+                  {((popup !== "Add answer" && popup !== "Add question") ? "Edit " : "") + popup}
+                  {loadingSubmit && <FaSpinner className="spinner" style={{ fontSize: "1.2rem", color: "#777", marginLeft: "10px" }} />}
+                  <FaTimes
+                    onClick={() => setPopup(false)} // Close the popup when clicked
+                    style={{
+                      marginLeft: "auto", // Move the icon to the right
+                      cursor: "pointer",
+                      fontSize: "1.5rem",
+                      color: "#777",
+                    }}
+                  />
+                </div>
+                <input
+                  type="text"
+                  value={text}
+                  onChange={(e) => setText(e.target.value)} // Update text state on input change
+                  style={{
+                    width: "100%",
+                    boxSizing: "border-box",
+                    padding: "10px",
+                    marginBottom: "10px",
+                    border: "1px solid #ccc",
+                    borderRadius: "5px",
+                  }}
+                />
+                <div style={{ display: "flex" }}>
+                  <div
+                    onClick={handlePopupSubmit}
+                    style={{
+                      padding: "5px 10px",
+                      backgroundColor: "#4CAF50",
+                      borderRadius: "10px",
+                      marginRight: "10px",
+                      cursor: "pointer",
+                      color: "#fff",
+                    }}
+                  >
+                    Submit
+                  </div>
+                  <div
+                    onClick={() => setPopup(false)}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      padding: "5px 10px",
+                      backgroundColor: "#F44336",
+                      borderRadius: "10px",
+                      cursor: "pointer",
+                      color: "#fff",
+                    }}
+                  >
+                    Close
+                  </div>
+                  {popup === "question" || popup === "answer" ? (
+                    <div
+                      onClick={handleDeleteField}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        padding: "5px 10px",
+                        backgroundColor: "#F44336",
+                        borderRadius: "10px",
+                        cursor: "pointer",
+                        color: "#fff",
+                        marginLeft: "auto", // Move the Delete button to the right
+                      }}
+                    >
+                      <FaTrash style={{ fontSize: "1.2rem" }} /> {/* Trash icon */}
+
+                    </div>
+                  ) : null}
+                </div>
+
+              </>
+            }
           </div>
         </div>
       )}
@@ -337,57 +432,150 @@ const EditQuiz = () => {
               backgroundColor: "#fff",
             }}
             title="Click to edit question"
-            onClick={() => {
+          >
+
+
+
+
+            <div
+              style={{ cursor: "pointer" }}
+              onClick={() => handleImageDivClick(questionIndex)}
+            >
+              <input
+                type="file"
+                accept="image/*"
+                style={{ display: "none" }}
+                ref={(el) => (fileInputRefs.current[questionIndex] = el)}
+                onChange={(e) => handleFileChange(e, questionIndex)}
+              />
+              {
+                question.picture_id &&
+                <div
+                  style={{
+                    position: "relative", // Make this the positioning context
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    marginBottom: "10px"
+                  }}
+                >
+                  <img
+                    src={`https://quizure.com/images/quizes/${quiz.id}/${question.picture_id}`}
+                    alt="User"
+                    style={{
+                      width: "100%",
+                      maxWidth: "800px",
+                      objectFit: "cover",
+                    }}
+                  />
+                  <div
+                    style={{
+                      position: "absolute",
+                      top: "50%",
+                      left: "calc(50% - 30px)",
+                      transform: "translate(-50%, -50%)", // Center the div
+                      width: 50,
+                      height: 50,
+                      backgroundColor: "#00000070",
+                      borderRadius: 10,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    {
+                      loadingPicture === questionIndex
+                        ? <FaSpinner className="spinner" style={{ fontSize: "1.5rem", color: "#fff" }} />
+                        : <FiEdit2 style={{ fontSize: "1.5rem", color: "#fff" }} />
+                    }
+                  </div>
+                  <div
+                    style={{
+                      position: "absolute",
+                      top: "50%",
+                      left: "calc(50% + 30px)",
+                      width: 50,
+                      height: 50,
+                      transform: "translate(-50%, -50%)", // Center the div
+                      backgroundColor: "#00000070",
+                      borderRadius: 10,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                    onClick={(e) => {
+                      e.stopPropagation(); // Prevent click from propagating to the question div
+                      setPopup("delete");
+                      setEditQuestionIndex(questionIndex);
+                    }}
+                  >
+                    <FaTrash style={{ fontSize: "1.5rem", color: "#fff" }} />
+                  </div>
+                </div>
+              }
+
+
+            </div>
+
+
+
+            <div onClick={() => {
               setPopup("question"); // Set popup to "question"
               setText(question.question); // Set text to the question content
               setEditQuestionIndex(questionIndex); // Set the question index being edited
-            }}
-          >
-            {question.question}
+            }}>{question.question}</div>
           </div>
 
-
           <div
-            style={{
-              display: "flex",
-              justifyContent: "flex-start",
-              flexDirection: "row-reverse",
-              marginBottom: "10px",
-              cursor: "pointer",
-              gap: "8px",
-              userSelect: "none"
-            }}
-            onClick={() => handleMultiselectToggle(questionIndex)}
+            style={{ display: "flex", width: "100%", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}
+            onClick={() => handleImageDivClick(questionIndex)}
           >
+            {!question.picture_id ? <div style={{ color: "rgb(141, 175, 187)", display: "flex", alignItems: "center", gap: "6px" }}>
+              <FaImage style={{ fontSize: "1.2rem", margin: 0 }} /> {/* Image icon */}
+              Add image
+            </div> : <div></div>}
             <div
               style={{
                 display: "flex",
-                width: 36,
-                height: 20,
-                borderRadius: 10,
-                backgroundColor: question.answers.some((answer) => answer.startsWith("<*>")) ? "#4CAF50" : "#ccc", // Check if any answer starts with "<*>"
-                position: "relative",
-                transition: "background 0.3s",
+                justifyContent: "flex-start",
+                alignItems: "center",
+                flexDirection: "row-reverse",
+                cursor: "pointer",
+                gap: "8px",
+                userSelect: "none"
               }}
+              onClick={() => handleMultiselectToggle(questionIndex)}
             >
               <div
                 style={{
-                  width: 16,
-                  height: 16,
-                  borderRadius: "50%",
-                  backgroundColor: "#fff",
-                  position: "absolute",
-                  top: 2,
-                  left: question.answers.some((answer) => answer.startsWith("<*>")) ? 18 : 2, // Adjust position based on condition
-                  transition: "left 0.2s",
+                  display: "flex",
+                  width: 36,
+                  height: 20,
+                  borderRadius: 10,
+                  backgroundColor: question.answers.some((answer) => answer.startsWith("<*>")) ? "#4CAF50" : "#ccc", // Check if any answer starts with "<*>"
+                  position: "relative",
+                  transition: "background 0.3s",
                 }}
-              />
-            </div>
-            {loadingMultiselect === questionIndex && <FaSpinner className="spinner" style={{ fontSize: "1.2rem", color: "#777" }} />}
+              >
+                <div
+                  style={{
+                    width: 16,
+                    height: 16,
+                    borderRadius: "50%",
+                    backgroundColor: "#fff",
+                    position: "absolute",
+                    top: 2,
+                    left: question.answers.some((answer) => answer.startsWith("<*>")) ? 18 : 2, // Adjust position based on condition
+                    transition: "left 0.2s",
+                  }}
+                />
+              </div>
+              {loadingMultiselect === questionIndex && <FaSpinner className="spinner" style={{ fontSize: "1.2rem", color: "#777" }} />}
 
-            <span style={{ color: "rgb(141, 175, 187)" }}>
-              Multi Select
-            </span>
+              <span style={{ color: "rgb(141, 175, 187)" }}>
+                Multi Select
+              </span>
+            </div>
           </div>
 
 

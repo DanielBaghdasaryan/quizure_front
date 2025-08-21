@@ -164,10 +164,10 @@ const Home = ({ user }) => {
           </div>
         )}
 
-        <Link to={user ? "/create_ai" : "/signin"} className="create-link">
+        <Link to="/create_ai" className="create-link">
           <div className="create-button" style={{ color: "#396792", display: "flex", alignItems: "center", gap: "10px" }}>
             <FaRobot size={25} color={iconColor} />
-            <span style={{ position: "relative", top: "2px" }}>Generate a quiz with AI</span>
+            <span style={{ position: "relative", top: "2px" }}>Play a quiz with AI</span>
           </div>
         </Link>
         <Link to={user ? "/create_xlsx" : "/signin"} className="create-link">
@@ -366,7 +366,7 @@ const Home = ({ user }) => {
                 height: "30px",
                 top: "15px",
                 left: "15px",
-                backgroundImage: `url("https://quizure.com/images/users/${quiz.owner_picture_id}.jpg")`,
+                backgroundImage: `url("https://quizure.com/images/users/${quiz.owner_id}_${quiz.owner_picture_id}.jpg")`,
                 backgroundSize: "cover",         // makes image fill the box
                 backgroundPosition: "center",    // centers the image
                 backgroundRepeat: "no-repeat",   // prevents tiling
