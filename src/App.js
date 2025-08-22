@@ -15,6 +15,8 @@ import CreateAI from "./pages/CreateAI";
 import { FaSpinner, FaTimes } from "react-icons/fa"; // Import icons
 import axios from "axios";
 import { FiEdit2 } from "react-icons/fi";
+import usePageTracking from './usePageTracking';
+
 
 
 const AppContent = ({ user, setUser, showPopup, setShowPopup, logout }) => {
@@ -257,12 +259,10 @@ const AppContent = ({ user, setUser, showPopup, setShowPopup, logout }) => {
 };
 
 const App = () => {
+  usePageTracking(); // This hooks into every page change
+
   const [user, setUser] = useState(null);
   const [showPopup, setShowPopup] = useState(false);
-
-  useEffect(() => {
-    document.title = "Quizure - Create & Play Quizzes Online";
-  }, []);
 
   useEffect(() => {
     const fetchUser = async () => {

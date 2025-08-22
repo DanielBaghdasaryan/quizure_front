@@ -20,7 +20,6 @@ const EditQuiz = () => {
   const [popup, setPopup] = useState(null); // Popup state
   const [editQuestionIndex, setEditQuestionIndex] = useState(null); // Track which question is being edited
   const [editAnswerIndex, setEditAnswerIndex] = useState(null); // Track which answer is being edited
-
   const navigate = useNavigate(); // Use navigate from react-router-dom
 
   const fetchQuiz = useCallback(async () => {
