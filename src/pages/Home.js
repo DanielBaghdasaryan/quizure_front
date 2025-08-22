@@ -7,6 +7,7 @@ import { FaSpinner } from "react-icons/fa"; // Import spinner icon
 import { FaRobot, FaRegEdit } from "react-icons/fa";
 import { AiOutlineFileExcel } from "react-icons/ai";
 import { FaFolderOpen } from "react-icons/fa";
+import { calmColors } from "../variables";
 
 import axios from "axios";
 
@@ -31,7 +32,7 @@ const Home = ({ user }) => {
 
     try {
       const cursorParam = lastQuizId.current ? `cursor=${lastQuizId.current}` : "";
-      const res = await fetch(`${baseUrl}quizes?${cursorParam}`);
+      const res = await fetch(`${baseUrl}quizes?${cursorParam}`, { credentials: "include" });
       const data = await res.json();
 
       if (data.quizes.length > 0) {
@@ -349,7 +350,7 @@ const Home = ({ user }) => {
               position: "relative",
               width: "100%",
               height: "65px",
-              backgroundColor: "gray",
+              backgroundColor: calmColors[quiz.id % calmColors.length],
               borderTopLeftRadius: "14px",
               borderTopRightRadius: "14px",
             }}>

@@ -1,11 +1,13 @@
 import React, { useEffect, useState, useRef, useCallback } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { baseUrl } from "../url";
-import { FiMenu, FiEdit2 } from "react-icons/fi";
+import { FiEdit2 } from "react-icons/fi";
 import { FaTimes, FaPlay } from "react-icons/fa"; // Import the close icon
+import { calmColors } from "../variables";
 
 
-const MyQuizzes = ({ user }) => {
+
+const Home = ({ user }) => {
   const [quizes, setQuizes] = useState([]);
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
@@ -23,12 +25,8 @@ const MyQuizzes = ({ user }) => {
 
     try {
       const cursorParam = lastQuizId.current ? `cursor=${lastQuizId.current}` : "";
-      // with credentials for CORS
-      const res = await fetch(`${baseUrl}my_quizzes?${cursorParam}`, {
-        credentials: 'include', // Include cookies for CORS
-      });
+      const res = await fetch(`${baseUrl}my_quizes?${cursorParam}`, { credentials: "include" });
       const data = await res.json();
-      console.log('here')
 
       if (data.quizes.length > 0) {
         setQuizes(prev => [...prev, ...data.quizes]);
@@ -70,6 +68,8 @@ const MyQuizzes = ({ user }) => {
     e.preventDefault(); // Prevent the default behavior
     setPopup(quiz); // Set the popup with the selected quiz
   };
+
+
 
 
   return (
@@ -206,7 +206,7 @@ const MyQuizzes = ({ user }) => {
       )}
       <div style={{ display: "flex", flexWrap: "wrap" }}>
         {quizes.map((quiz) => (
-          <Link key={quiz.id} to={`/quiz/${quiz.id}/10`}
+          <div key={quiz.id} to={`/quiz/${quiz.id}/10`}
             style={{
 
               textDecoration: "none",
@@ -219,14 +219,15 @@ const MyQuizzes = ({ user }) => {
               borderRadius: "15px",
               height: "130px",
               backgroundColor: "#f0f0f0",
-
-            }}>
+            }}
+            onClick={quiz.questions.length > 25 ? (e) => handleMenuClick(e, quiz) : () => navigate(`/quiz/${quiz.id}/${quiz.questions.length}`)} // Assuming you have a function to handle menu click
+          >
 
             <div style={{
               position: "relative",
               width: "100%",
-              height: "65px",
-              backgroundColor: "gray",
+              height: "45px",
+              backgroundColor: calmColors[quiz.id % calmColors.length],
               borderTopLeftRadius: "14px",
               borderTopRightRadius: "14px",
             }}>
@@ -237,7 +238,7 @@ const MyQuizzes = ({ user }) => {
                   width: 32,
                   height: 32,
                   top: 5,
-                  left: 90,
+                  right: 5,
                   backgroundColor: "#00000050",
                   borderRadius: 10,
                   display: "flex",
@@ -247,28 +248,11 @@ const MyQuizzes = ({ user }) => {
                   textDecoration: "none"
                 }}
                   to={`/editquiz/${quiz.id}`}
+                  onClick={e => e.stopPropagation()} // Prevent parent click
                 >
                   <FiEdit2 size={18} />
                 </Link>
               }
-              {quiz.questions.length >= 10 && <div style={{
-                position: "absolute",
-                width: 32,
-                height: 32,
-                top: 5,
-                right: 5,
-                backgroundColor: "#00000050",
-                borderRadius: 10,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                color: "white",
-                textDecoration: "none"
-              }}
-                onClick={(e) => handleMenuClick(e, quiz)}  // Assuming you have a function to handle menu click
-              >
-                <FiMenu size={18} />
-              </div>}
             </div>
             <div style={{ padding: "10px", height: "80px" }}>
               {quiz.title}
@@ -286,7 +270,7 @@ const MyQuizzes = ({ user }) => {
             }}>
               {quiz.questions.length} questions
             </div> */}
-          </Link>))}
+          </div>))}
 
         {loading && <p>Loading...</p>}
       </div>
@@ -296,4 +280,4 @@ const MyQuizzes = ({ user }) => {
   );
 };
 
-export default MyQuizzes;
+export default Home;
