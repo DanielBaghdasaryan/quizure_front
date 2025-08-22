@@ -20,6 +20,8 @@ import usePageTracking from './usePageTracking';
 
 
 const AppContent = ({ user, setUser, showPopup, setShowPopup, logout }) => {
+  usePageTracking(); // This hooks into every page change
+
   const location = useLocation();
   const [username, setUsername] = useState(user ? user.name : "");
   const [spinner, setSpinner] = useState(null);
@@ -259,8 +261,6 @@ const AppContent = ({ user, setUser, showPopup, setShowPopup, logout }) => {
 };
 
 const App = () => {
-  usePageTracking(); // This hooks into every page change
-
   const [user, setUser] = useState(null);
   const [showPopup, setShowPopup] = useState(false);
 

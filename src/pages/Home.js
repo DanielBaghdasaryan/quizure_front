@@ -405,7 +405,7 @@ const Home = ({ user }) => {
                 right: 10,
                 fontSize: "0.8rem",
               }}>
-                {quiz.owner_name.length > 13
+                {quiz.owner_name && quiz.owner_name.length > 13
                   ? quiz.owner_name.slice(0, 13) + "..."
                   : quiz.owner_name}
               </div>
