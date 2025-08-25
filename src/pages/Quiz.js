@@ -220,6 +220,20 @@ const Quiz = () => {
             padding: "20px",
             marginBottom: "20px",
           }}>
+            {
+              questions[questionIndex].picture_id && <img
+                src={`https://quizure.com/images/quizes/${id}/${questions[questionIndex].picture_id}`}
+                alt="User"
+                style={{
+                  width: "auto",
+                  maxWidth: "100%",
+                  maxHeight: "300px",
+                  objectFit: "contain",
+                  marginBottom: "15px",
+                }}
+              />
+            }
+
             <div style={{ marginBottom: "10px", lineHeight: "1.5" }}>
               <b>{questions[questionIndex].question}</b>
             </div>

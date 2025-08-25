@@ -211,7 +211,6 @@ const EditQuiz = () => {
 
   const handleDeleteImage = async () => {
     setLoadingSubmit(true); // Set loading state for submit
-    console.log('here')
 
     await axios.put(`https://quizure.com/api/image`, {
       type: "question",
@@ -220,7 +219,6 @@ const EditQuiz = () => {
     },
       { withCredentials: true },
     );
-    console.log('and here')
 
     // Refetch the quiz after a successful update
     fetchQuiz();
@@ -529,10 +527,12 @@ const EditQuiz = () => {
             style={{ display: "flex", width: "100%", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}
             onClick={() => handleImageDivClick(questionIndex)}
           >
-            {!question.picture_id ? <div style={{ color: "rgb(141, 175, 187)", display: "flex", alignItems: "center", gap: "6px" }}>
+            {!question.picture_id ? <div key='add_image' style={{
+              color: "rgb(141, 175, 187)", display: "flex", alignItems: "center", gap: "6px", cursor: "pointer"
+            }}>
               <FaImage style={{ fontSize: "1.2rem", margin: 0 }} /> {/* Image icon */}
               Add image
-            </div> : <div></div>}
+            </div> : <div key='blank'></div>}
             <div
               style={{
                 display: "flex",

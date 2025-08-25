@@ -69,11 +69,10 @@ const Home = ({ user }) => {
     setPopup(quiz); // Set the popup with the selected quiz
   };
 
-
-
-
   return (
     <div style={{ marginTop: "10px" }}>
+
+
       {(popup && popup !== 'title') && (
         <div className="popup-overlay" onClick={() => setPopup(null)}>
           <div className="popup" onClick={(e) => e.stopPropagation()}>
@@ -226,12 +225,31 @@ const Home = ({ user }) => {
             <div style={{
               position: "relative",
               width: "100%",
-              height: "45px",
+              height: "65px",
               backgroundColor: calmColors[quiz.id % calmColors.length],
               borderTopLeftRadius: "14px",
               borderTopRightRadius: "14px",
             }}>
-
+              <div style={{
+                position: "absolute",
+                width: "100%",
+                height: "25px",
+                bottom: 0,
+                backgroundColor: "#00000050"
+              }} />
+              <div style={{
+                position: "absolute",
+                width: "30px",
+                height: "30px",
+                top: "15px",
+                left: "15px",
+                backgroundImage: `url("https://quizure.com/images/users/${quiz.owner_id}_${quiz.owner_picture_id}.jpg")`,
+                backgroundSize: "cover",         // makes image fill the box
+                backgroundPosition: "center",    // centers the image
+                backgroundRepeat: "no-repeat",   // prevents tiling
+                borderRadius: "50%",
+                border: "2px solid white",
+              }} />
               {
                 quiz.owner_id === user?.id && <Link style={{
                   position: "absolute",
@@ -253,6 +271,21 @@ const Home = ({ user }) => {
                   <FiEdit2 size={18} />
                 </Link>
               }
+              <div style={{
+                display: "flex",
+                justifyContent: "flex-end",
+                alignItems: "flex-end",
+                color: "white",
+                position: "absolute",
+                width: "100%",
+                bottom: 5,
+                right: 10,
+                fontSize: "0.8rem",
+              }}>
+                {quiz.owner_name && quiz.owner_name.length > 13
+                  ? quiz.owner_name.slice(0, 13) + "..."
+                  : quiz.owner_name}
+              </div>
             </div>
             <div style={{ padding: "10px", height: "80px" }}>
               {quiz.title}
