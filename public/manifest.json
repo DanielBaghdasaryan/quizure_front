@@ -1,6 +1,6 @@
 {
-  "short_name": "React App",
-  "name": "Create React App Sample",
+  "short_name": "Quizure",
+  "name": "Quizure - Play & Create Quizzes",
   "icons": [
     {
       "src": "favicon.ico",
