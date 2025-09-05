@@ -82,6 +82,9 @@ const EditQuiz = () => {
 
   const handleAnswerClick = async (questionIndex, answerIndex) => {
     const updatedQuestions = [...quiz.questions];
+
+
+
     const multiselect = answers.some((answer) => answer.startsWith("<*>"));
     const { answers } = updatedQuestions[questionIndex];
 
