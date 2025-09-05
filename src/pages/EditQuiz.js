@@ -82,8 +82,8 @@ const EditQuiz = () => {
 
   const handleAnswerClick = async (questionIndex, answerIndex) => {
     const updatedQuestions = [...quiz.questions];
-    const { answers } = updatedQuestions[questionIndex];
     const multiselect = answers.some((answer) => answer.startsWith("<*>"));
+    const { answers } = updatedQuestions[questionIndex];
 
     if (answerIndex === 0 && !multiselect) return; // If the clicked answer is already the first, do nothing
 
@@ -456,6 +456,7 @@ const EditQuiz = () => {
                     marginBottom: "10px"
                   }}
                 >
+
                   <img
                     src={`https://quizure.com/images/quizes/${quiz.id}/${question.picture_id}`}
                     alt="User"
