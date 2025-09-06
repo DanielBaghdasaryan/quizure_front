@@ -3,6 +3,8 @@ import { createRoot } from "react-dom/client"; // ✅ Use createRoot
 
 import App from "./App";
 
+
+
 // Get root element
 const rootElement = document.getElementById("root");
 
